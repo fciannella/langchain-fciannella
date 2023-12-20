@@ -4,7 +4,44 @@ The `langchain-nvidia-trt` package contains LangChain integrations for connectin
 
 Below is an example on how to use some common functionality surrounding text-completion.
 
-## Setting up Triton+TRT-LLM 
+## Quickstart: using the Nemo Inference Container
+
+The [NeMo Inferencing Container](https://docs.nvidia.com/nemo-framework/user-guide/latest/deployingthenemoframeworkmodel.html#supported-model-and-gpus) uses Triton and TRT-LLM to deploy LLM models. This is the quickest way to stand up a server.
+
+Here we will give an example on how to stand up the service with an [NVIDIA nemotron model](https://huggingface.co/nvidia/nemotron-3-8b-base-4k). You will need to request access to the model.
+
+### Download the model
+
+You can download the model into your working directory:
+
+```shell
+git lfs install
+git clone https://<hf_username>:<hf_access_token>@huggingface.co/nvidia/nemotron-3-8b-base-4k
+```
+
+### Start the NeMo Inference Container
+
+You can now start the container:
+
+```shell
+docker run --gpus all -it --rm --shm-size=4g --network host -v `pwd`/nemotron-3-8b-base-4k/Nemotron-3-8B-Base-4k.nemo:/opt/checkpoints/Nemotron-3-8B-Base-4k.nemo --name nemo-inference -w /opt/NeMo nvcr.io/nvidia/nemo/nemofw-inference:23.10-for-rag
+```
+
+### Start the server
+
+You can now start the server:
+
+```shell 
+python scripts/deploy/deploy_triton.py --nemo_checkpoint /opt/checkpoints/Nemotron-3-8B-Base-4k.nemo --model_type="gptnext" --triton_model_name nemotron-3-8b
+```
+The model is now served. You can add a parameter `num_gpus` to set the number of GPUs to perform the inference on, based on the number of GPUs available.
+
+
+
+
+
+
+## Manually Setting up Triton+TRT-LLM 
 
 In this section we will provide a quickstart on how to setup a supported LLM on Triton+TRT-LLM. Please use [Optimizing Inference on Large Language Models with NVIDIA TensorRT-LLM](https://developer.nvidia.com/blog/optimizing-inference-on-llms-with-tensorrt-llm-now-publicly-available/) and the [TensorRT-LLM Backend](https://github.com/triton-inference-server/tensorrtllm_backend) repo for more detailed instructions.
 
